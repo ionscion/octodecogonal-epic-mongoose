@@ -10,6 +10,15 @@ module.exports = {
       res.status(500).json(err);
     }
   },
+  async getThoughtById({ params }, res) {
+    try {
+      const dbThoughtData = await Thought.findOne({ _id: params.id });
+      res.json(dbThoughtData);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
+    }
+  },
   async createThought({ body }, res) {
     try {
       const dbThoughtData = await Thought.create(body);
