@@ -20,8 +20,12 @@ const ThoughtSchema = new Schema(
             type: String,
             required: 'You need to provide a username!'
         },
-        // Use ReactionsSchema to validate data for a reply
-        reactions: [ReactionSchema]
+        reactions: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'Reaction',
+            }
+        ]
     },
     {
         toJSON: {
