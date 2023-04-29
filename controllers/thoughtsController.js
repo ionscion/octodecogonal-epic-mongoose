@@ -1,4 +1,4 @@
-const { User, Thought } = require("../models");
+const { User, Thought, Reaction } = require("../models");
 
 module.exports = {
   //get all available thoughts
@@ -58,6 +58,44 @@ module.exports = {
   async deleteThought({ params }, res) {
     try {
       const dbThoughtData = await Thought.findOneAndDelete({ _id: params.id });
+      if (!dbThoughtData) {
+        res.status(404).json({ message: "No thought found with this id!" });
+        return;
+      }
+      res.json(dbThoughtData);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
+    }
+  },
+  //friends
+  //Post - create reaction
+  async createReaction({ params, body }, res) {
+    try {
+      const newReaction =  await Reaction.create(body); // create new Reaction object with data from request body
+      const dbThoughtData = await Thought.findOneAndUpdate(
+        { _id: params.thoughtId },
+        { $addToSet: { reactions: newReaction } }, // add the new Reaction object to the reactions array
+        { new: true, runValidators: true }
+      );
+      if (!dbThoughtData) {
+        res.status(404).json({ message: "No thought found with this id!" });
+        return;
+      }
+      res.json(dbThoughtData);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
+    }
+  },
+  //Delete - remove reaction
+  async deleteReaction({ params,body}, res) {
+    try {
+      const dbThoughtData = await Thought.findOneAndUpdate(
+        { _id: params.thoughtId },
+        { $pull: { reactions: { reactionId: body.reactionId } } },
+        { new: true }
+      );
       if (!dbThoughtData) {
         res.status(404).json({ message: "No thought found with this id!" });
         return;
