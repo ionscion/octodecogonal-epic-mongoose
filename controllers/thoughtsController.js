@@ -1,4 +1,4 @@
-const { User, Thought, Reaction } = require("../models");
+const { User, Thought } = require("../models");
 
 module.exports = {
   //get all available thoughts
@@ -72,10 +72,9 @@ module.exports = {
   //Post - create reaction
   async createReaction({ params, body }, res) {
     try {
-      const newReaction =  await Reaction.create(body); // create new Reaction object with data from request body
       const dbThoughtData = await Thought.findOneAndUpdate(
         { _id: params.thoughtId },
-        { $addToSet: { reactions: newReaction } }, // add the new Reaction object to the reactions array
+        { $addToSet: { reactions: body } }, // add the new Reaction object to the reactions array
         { new: true, runValidators: true }
       );
       if (!dbThoughtData) {
@@ -89,13 +88,14 @@ module.exports = {
     }
   },
   //Delete - remove reaction
-  async deleteReaction({ params,body}, res) {
+  async deleteReaction({ params, body}, res) {
     try {
       const dbThoughtData = await Thought.findOneAndUpdate(
         { _id: params.thoughtId },
         { $pull: { reactions: { reactionId: body.reactionId } } },
-        { new: true }
+       {runValidators: true, new: true}
       );
+      console.log(dbThoughtData);
       if (!dbThoughtData) {
         res.status(404).json({ message: "No thought found with this id!" });
         return;
@@ -107,3 +107,4 @@ module.exports = {
     }
   },
 };
+
